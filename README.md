@@ -11,6 +11,8 @@ Two demo properties ship with it:
 
 The architecture (walls, glazing, ceilings, kitchens, baths) is generated in code from plain data, so a new property is a new data file. Realism comes from real scanned assets: photo-scanned PBR materials (oak, marble, plaster, fabrics, grass), a photographed HDRI sky that lights the scene, and real furniture and plant models, all CC0 from [Poly Haven](https://polyhaven.com).
 
+**Live:** https://muhsin48ahmed.github.io/real-estate-virtual-tour/
+
 ## Run it
 
 ```bash
@@ -69,6 +71,12 @@ Each property lives in `src/data/properties/*.ts` and is described in metres on 
 - **Post-processing:** N8AO ambient occlusion, bloom on the downlights, Khronos PBR Neutral tone mapping, vignette and SMAA. Quality drops automatically on phones and slow GPUs.
 - **State:** zustand, mirrored to the URL so any view can be shared as a link
 - **Design tokens:** `design-system/aurelia-estates/` (the tour page overrides typography in `pages/tour.md`)
+
+## Deployment
+
+Every push to `main` runs `.github/workflows/deploy.yml`: lint, unit tests and a production build, then the Playwright E2E suite on desktop and mobile. Only when both pass is the build published to GitHub Pages. The site is served from `/real-estate-virtual-tour/`, which the workflow passes to Vite as `PAGES_BASE`; locally the base stays `/`.
+
+Leads run in demo mode on the live site until `VITE_INQUIRY_ENDPOINT` is added to the build step's `env` (for example from a repository secret).
 
 ## The cinematic film
 

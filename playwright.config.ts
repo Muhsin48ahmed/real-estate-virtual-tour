@@ -1,6 +1,8 @@
 import { defineConfig, devices } from '@playwright/test'
 
 const PORT = 5175
+/** Locally, use the installed Google Chrome (no download). CI runners use Playwright's own Chromium. */
+const CHANNEL = process.env.CI ? undefined : 'chrome'
 
 export default defineConfig({
   testDir: './e2e',
@@ -12,14 +14,13 @@ export default defineConfig({
   reporter: 'list',
   use: {
     baseURL: `http://localhost:${PORT}`,
-    // Uses the locally installed Google Chrome, so no browser download is needed.
-    channel: 'chrome',
+    channel: CHANNEL,
     launchOptions: { args: ['--enable-unsafe-swiftshader', '--ignore-gpu-blocklist'] },
     trace: 'retain-on-failure',
   },
   projects: [
     { name: 'desktop', use: { viewport: { width: 1440, height: 900 } } },
-    { name: 'mobile', use: { ...devices['Pixel 7'], channel: 'chrome' } },
+    { name: 'mobile', use: { ...devices['Pixel 7'], channel: CHANNEL } },
   ],
   webServer: {
     command: `npx vite --port ${PORT} --strictPort`,
