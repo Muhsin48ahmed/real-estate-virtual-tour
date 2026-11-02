@@ -30,3 +30,6 @@ e2e/screenshots/
 
 # Test coverage
 coverage/
+
+# Raw source footage for the film (re-downloaded by npm run film)
+.cache/

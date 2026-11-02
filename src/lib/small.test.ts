@@ -40,6 +40,9 @@ describe('startUrlSync', () => {
     expect(window.location.search).toBe('?property=villa-serena&room=terrace')
 
     tourStore.getState().selectProperty('skyline-12b')
+    expect(window.location.search).toBe('?property=skyline-12b&view=tour')
+
+    tourStore.getState().showFilm()
     expect(window.location.search).toBe('?property=skyline-12b')
 
     stop()

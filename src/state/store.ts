@@ -21,8 +21,9 @@ export const useActiveRoom = (): Room | null => {
 /** Keeps the address bar in step with the tour so any view can be shared as a link. */
 export const startUrlSync = (): (() => void) =>
   tourStore.subscribe((state, prev) => {
-    if (state.propertyId === prev.propertyId && state.activeRoomId === prev.activeRoomId) return
-    window.history.replaceState(null, '', tourSearch(state.propertyId, state.activeRoomId))
+    const isSame = state.propertyId === prev.propertyId && state.activeRoomId === prev.activeRoomId && state.view === prev.view
+    if (isSame) return
+    window.history.replaceState(null, '', tourSearch({ propertyId: state.propertyId, roomId: state.activeRoomId, view: state.view }))
   })
 
 export interface ViewerPose {

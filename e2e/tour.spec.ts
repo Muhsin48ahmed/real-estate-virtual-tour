@@ -32,7 +32,7 @@ const shoot = async (page: Page, name: string) => {
 test('overview shows the property, its rooms and the floor plan', async ({ page }) => {
   const errors = trackConsoleErrors(page)
 
-  await page.goto('/')
+  await page.goto('/?view=tour')
   await waitForScene(page)
 
   await expect(page.getByRole('heading', { name: 'Villa Serena' })).toBeVisible()
@@ -45,7 +45,7 @@ test('overview shows the property, its rooms and the floor plan', async ({ page 
 
 test('guided tour walks room to room and ends at the inquiry form', async ({ page }) => {
   const errors = trackConsoleErrors(page)
-  await page.goto('/')
+  await page.goto('/?view=tour')
   await waitForScene(page)
 
   await page.getByRole('button', { name: /start guided tour/i }).click()
@@ -87,7 +87,7 @@ test('switching to the apartment resets the tour and updates the link', async ({
   await page.getByRole('button', { name: /Skyline 12B/ }).click()
 
   await expect(page.getByRole('heading', { name: 'Skyline Residence 12B' })).toBeVisible()
-  await expect(page).toHaveURL(/property=skyline-12b$/)
+  await expect(page).toHaveURL(/property=skyline-12b&view=tour$/)
   await shoot(page, 'apartment-overview')
 })
 
@@ -108,7 +108,7 @@ test('deep links open straight into a room', async ({ page }) => {
 })
 
 test('layout never scrolls sideways', async ({ page }) => {
-  await page.goto('/')
+  await page.goto('/?view=tour')
   await waitForScene(page)
 
   const overflow = await page.evaluate(() => document.documentElement.scrollWidth - window.innerWidth)

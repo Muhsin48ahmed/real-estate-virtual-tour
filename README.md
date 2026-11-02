@@ -1,6 +1,6 @@
 # Aurelia Estates · Virtual Tour
 
-A browser-based 3D walkthrough for selling property off-plan. Buyers fly over a dollhouse cut-away of the home, step into any room at eye level, move between rooms through doorway labels or the floor plan, and finish the guided tour at an inquiry form. Every lead records which rooms the buyer looked at.
+A browser-based sales experience for property sold off-plan. It opens with a **cinematic scroll film**: scrolling scrubs through dusk aerials and interiors, with editorial titles over full-screen footage. It then hands off to an **interactive 3D tour**, where buyers fly over a dollhouse cut-away of the home, step into any room at eye level, move between rooms through doorway labels or the floor plan, and finish the guided tour at an inquiry form. Every lead records which rooms the buyer looked at.
 
 Two demo properties ship with it:
 
@@ -16,11 +16,13 @@ The architecture (walls, glazing, ceilings, kitchens, baths) is generated in cod
 ```bash
 npm install
 npm run assets   # downloads ~53 MB of CC0 textures, sky and models into public/assets (skips files already there)
+npm run film     # downloads the approved stock clips and encodes the ~22 MB scroll film into public/film
 npm run dev
 ```
 
-Open http://localhost:5173. Useful deep links:
+Open http://localhost:5173 to start with the film. Useful deep links:
 
+- `/?view=tour` skips the film and opens the 3D tour
 - `/?property=villa-serena&room=terrace`
 - `/?property=skyline-12b&room=lounge`
 
@@ -56,6 +58,7 @@ Each property lives in `src/data/properties/*.ts` and is described in metres on 
 | `npm run coverage` | Tests with a coverage report |
 | `npm run e2e` | End-to-end tests in your installed Google Chrome, desktop and mobile; screenshots land in `e2e/screenshots/` |
 | `npm run lint` | Oxlint |
+| `npm run film` | Rebuild the scroll film from the clips listed in `scripts/build-film.mjs` (uses the bundled `ffmpeg-static`) |
 | `npm run assets` | Fetch the Poly Haven assets listed in `scripts/fetch-assets.mjs` and refresh `public/assets/credits.json` |
 
 ## How it's built
@@ -66,6 +69,12 @@ Each property lives in `src/data/properties/*.ts` and is described in metres on 
 - **Post-processing:** N8AO ambient occlusion, bloom on the downlights, Khronos PBR Neutral tone mapping, vignette and SMAA. Quality drops automatically on phones and slow GPUs.
 - **State:** zustand, mirrored to the URL so any view can be shared as a link
 - **Design tokens:** `design-system/aurelia-estates/` (the tour page overrides typography in `pages/tour.md`)
+
+## The cinematic film
+
+The film uses free stock footage from Pexels by Alef Morais and Abdullah | 4K, under the [Pexels License](https://www.pexels.com/license/). It's labelled on screen as illustrative, and `public/film/credits.json` lists every clip. For a real client, swap in the developer's own CGI renders or drone footage: put the source URLs in `scripts/build-film.mjs`, run `npm run film`, and edit the chapter copy in `src/data/film.ts`.
+
+Each clip is encoded with no audio at 30 fps, with a keyframe every 6 frames, so scroll-driven seeking stays smooth. Scrubbing eases towards the scroll position each frame, and the 3D tour starts downloading in the background while the film plays.
 
 ## Asset credits
 

@@ -1,6 +1,10 @@
+/** The cinematic intro film, or the interactive 3D tour. */
+export type View = 'film' | 'tour'
+
 export interface TourLocation {
   readonly propertyId: string
   readonly roomId: string | null
+  readonly view: View
 }
 
 /** Maps each property id to its room ids; the first key is the default property. */
@@ -13,11 +17,14 @@ export const parseTourUrl = (search: string, known: KnownRooms): TourLocation =>
   const propertyId = Object.hasOwn(known, requested) ? requested : Object.keys(known)[0]
   const room = params.get('room')
   const roomId = room && requested === propertyId && known[propertyId].includes(room) ? room : null
-  return { propertyId, roomId }
+  // A room link always means the tour; otherwise the film plays unless the link asks for the tour.
+  const view: View = roomId || params.get('view') === 'tour' ? 'tour' : 'film'
+  return { propertyId, roomId, view }
 }
 
-export const tourSearch = (propertyId: string, roomId: string | null): string => {
+export const tourSearch = ({ propertyId, roomId, view }: TourLocation): string => {
   const params = new URLSearchParams({ property: propertyId })
   if (roomId) params.set('room', roomId)
+  else if (view === 'tour') params.set('view', 'tour')
   return `?${params.toString()}`
 }
