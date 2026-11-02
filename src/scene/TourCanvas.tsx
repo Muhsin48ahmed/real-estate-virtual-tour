@@ -2,11 +2,13 @@ import { PerformanceMonitor } from '@react-three/drei'
 import { Canvas } from '@react-three/fiber'
 import { Suspense, useMemo, useState } from 'react'
 import { planBounds } from '../lib/geometry'
+import { chooseQuality, isSoftwareRenderer, stepDown, stepUp, type Quality } from '../lib/quality'
+import { webglRendererName } from '../lib/webgl'
 import type { FurnitureKind } from '../data/types'
 import { useProperty, useTour } from '../state/store'
 import { CameraRig } from './CameraRig'
 import { FLOOR_TOP } from './constants'
-import { Effects, type Quality } from './Effects'
+import { Effects } from './Effects'
 import { Furniture } from './furniture'
 import { LabelProjector } from './LabelProjector'
 import { RoomFloors } from './RoomFloors'
@@ -17,14 +19,20 @@ import { Surroundings } from './Surroundings'
 /** Wall-hung and ceiling-hung pieces would float above the cut-down walls in the dollhouse view. */
 const HIDDEN_IN_CUTAWAY: ReadonlySet<FurnitureKind> = new Set(['artwork', 'pendant'])
 
-const DPR_RANGE: Record<Quality, [number, number]> = { high: [1, 1.75], low: [0.75, 1] }
+const DPR_RANGE: Record<Quality, [number, number]> = { high: [1, 1.75], low: [0.75, 1], minimal: [0.5, 0.75] }
 
-const initialQuality = (): Quality => (window.matchMedia('(pointer: coarse)').matches ? 'low' : 'high')
+const initialQuality = (): Quality =>
+  chooseQuality({
+    isSoftware: isSoftwareRenderer(webglRendererName()),
+    isCoarsePointer: window.matchMedia('(pointer: coarse)').matches,
+  })
 
 export function TourCanvas({ onReady }: { readonly onReady: () => void }) {
   const property = useProperty()
   const bounds = useMemo(() => planBounds(property.rooms), [property])
-  const [quality, setQuality] = useState<Quality>(initialQuality)
+  // The device's starting tier is also its ceiling: a recovering frame rate never climbs past it.
+  const [ceiling] = useState<Quality>(initialQuality)
+  const [quality, setQuality] = useState<Quality>(ceiling)
   const isInside = useTour((s) => s.mode === 'room')
   const cx = bounds.x + bounds.w / 2
   const cz = bounds.z + bounds.d / 2
@@ -41,10 +49,10 @@ export function TourCanvas({ onReady }: { readonly onReady: () => void }) {
       aria-label={`3D model of ${property.name}`}
       onCreated={onReady}
     >
-      <PerformanceMonitor onDecline={() => setQuality('low')} onIncline={() => setQuality('high')} />
+      <PerformanceMonitor onDecline={() => setQuality(stepDown)} onIncline={() => setQuality((q) => stepUp(q, ceiling))} />
       {/* The sky, textures and models stream in; the loading screen covers the wait. */}
       <Suspense fallback={null}>
-        <SceneLighting bounds={bounds} surroundings={property.surroundings} />
+        <SceneLighting bounds={bounds} surroundings={property.surroundings} quality={quality} />
 
         <group key={property.id}>
         <Surroundings kind={property.surroundings} bounds={bounds} />

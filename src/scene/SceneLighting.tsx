@@ -1,15 +1,18 @@
 import { Environment } from '@react-three/drei'
 import type { Rect, Surroundings } from '../data/types'
+import type { Quality } from '../lib/quality'
 import { HDRI_HORIZON, HDRI_SUN, HDRI_URL } from './assets'
 
 const SUN_DISTANCE = 40
-const SHADOW_MAP = 4096
+/** Shadow-map resolution per quality tier; software rendering can't afford the 4K map. */
+const SHADOW_MAP: Record<Quality, number> = { high: 4096, low: 2048, minimal: 1024 }
 const GARDEN_HAZE: [number, number] = [160, 900]
 const SKYLINE_HAZE: [number, number] = [140, 700]
 
 interface SceneLightingProps {
   readonly bounds: Rect
   readonly surroundings: Surroundings
+  readonly quality: Quality
 }
 
 /** Unit vector towards the sun as it appears in the HDRI, in three.js world space. */
@@ -22,7 +25,7 @@ const sunDirection = (): [number, number, number] => {
  * A real photographed sky (Poly Haven HDRI) provides the background, reflections and soft fill.
  * A directional light placed exactly where that sky's sun is adds crisp shadows that agree with it.
  */
-export function SceneLighting({ bounds, surroundings }: SceneLightingProps) {
+export function SceneLighting({ bounds, surroundings, quality }: SceneLightingProps) {
   const cx = bounds.x + bounds.w / 2
   const cz = bounds.z + bounds.d / 2
   const [dx, dy, dz] = sunDirection()
@@ -39,7 +42,7 @@ export function SceneLighting({ bounds, surroundings }: SceneLightingProps) {
         color="#fff4e6"
         intensity={2.6}
         castShadow
-        shadow-mapSize={[SHADOW_MAP, SHADOW_MAP]}
+        shadow-mapSize={[SHADOW_MAP[quality], SHADOW_MAP[quality]]}
         shadow-bias={-0.0002}
         shadow-normalBias={0.03}
         shadow-camera-left={-extent}

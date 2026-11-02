@@ -37,7 +37,7 @@ test('overview shows the property, its rooms and the floor plan', async ({ page 
   await page.goto('/?view=tour')
   await waitForScene(page)
 
-  await expect(page.getByRole('heading', { name: 'Villa Serena' })).toBeVisible()
+  await expect(page.locator('#property-name')).toHaveText('Villa Serena')
   await expect(page.getByText('$1,850,000')).toBeVisible()
   await openFloorPlan(page)
   await expect(page.getByRole('button', { name: /Living Room, 70 square metres/ })).toBeVisible()
@@ -88,7 +88,7 @@ test('switching to the apartment resets the tour and updates the link', async ({
 
   await page.getByRole('button', { name: /Skyline 12B/ }).click()
 
-  await expect(page.getByRole('heading', { name: 'Skyline Residence 12B' })).toBeVisible()
+  await expect(page.locator('#property-name')).toHaveText('Skyline Residence 12B')
   await expect(page).toHaveURL(/property=skyline-12b&view=tour$/)
   await shoot(page, 'apartment-overview')
 })

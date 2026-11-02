@@ -1,13 +1,20 @@
 import { Bloom, EffectComposer, N8AO, SMAA, ToneMapping, Vignette } from '@react-three/postprocessing'
 import { ToneMappingMode } from 'postprocessing'
-
-export type Quality = 'high' | 'low'
+import type { Quality } from '../lib/quality'
 
 /**
  * Photographic finishing: ambient occlusion grounds furniture and darkens corners, bloom lets the
- * downlights glow, Khronos PBR Neutral tone mapping keeps material colours true, and a light vignette frames the shot.
+ * downlights glow, Khronos PBR Neutral tone mapping keeps material colours true, and a light vignette
+ * frames the shot. On software rendering only the tone mapping stays, so colours match but it stays fast.
  */
 export function Effects({ quality }: { readonly quality: Quality }) {
+  if (quality === 'minimal') {
+    return (
+      <EffectComposer multisampling={0} enableNormalPass={false}>
+        <ToneMapping mode={ToneMappingMode.NEUTRAL} />
+      </EffectComposer>
+    )
+  }
   const isHigh = quality === 'high'
   return (
     <EffectComposer multisampling={0} enableNormalPass={false}>

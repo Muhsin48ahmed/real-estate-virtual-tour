@@ -35,7 +35,10 @@ jobs:
           path: dist
 
   e2e:
-    runs-on: ubuntu-latest
+    # The 3D tour needs a real GPU: Linux runners only have CPU-rendered WebGL, which stalls for minutes
+    # compiling the interior shaders. Apple Silicon macOS runners expose Metal graphics.
+    runs-on: macos-latest
+    timeout-minutes: 30
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
@@ -43,7 +46,9 @@ jobs:
           node-version: 22
           cache: npm
       - run: npm ci
-      - run: npx playwright install --with-deps chromium
+      - run: npx playwright install chromium
+      - name: Show the WebGL renderer in use
+        run: node -e "const { chromium } = require('@playwright/test'); (async () => { const b = await chromium.launch(); const p = await b.newPage(); console.log(await p.evaluate(() => { const gl = document.createElement('canvas').getContext('webgl2'); const i = gl && gl.getExtension('WEBGL_debug_renderer_info'); return i ? gl.getParameter(i.UNMASKED_RENDERER_WEBGL) : 'no WebGL' })); await b.close() })()"
       # Builds and serves the site itself (see playwright.config.ts), then runs the film and tour flows on desktop and mobile.
       - run: npx playwright test
       - if: failure()

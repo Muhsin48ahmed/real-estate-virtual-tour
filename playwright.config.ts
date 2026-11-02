@@ -3,6 +3,8 @@ import { defineConfig, devices } from '@playwright/test'
 const PORT = 5175
 /** Locally, use the installed Google Chrome (no download). CI runners use Playwright's own Chromium. */
 const CHANNEL = process.env.CI ? undefined : 'chrome'
+/** E2E_SOFTWARE_GL=1 turns the GPU off locally, reproducing CI's CPU-only WebGL. */
+const SOFTWARE_GL_ARGS = process.env.E2E_SOFTWARE_GL ? ['--disable-gpu', '--use-angle=swiftshader'] : []
 
 export default defineConfig({
   testDir: './e2e',
@@ -16,7 +18,7 @@ export default defineConfig({
   use: {
     baseURL: `http://localhost:${PORT}`,
     channel: CHANNEL,
-    launchOptions: { args: ['--enable-unsafe-swiftshader', '--ignore-gpu-blocklist'] },
+    launchOptions: { args: ['--enable-unsafe-swiftshader', '--ignore-gpu-blocklist', ...SOFTWARE_GL_ARGS] },
     trace: 'retain-on-failure',
   },
   projects: [
