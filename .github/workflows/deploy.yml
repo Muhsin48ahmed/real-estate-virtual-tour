@@ -44,7 +44,7 @@ jobs:
           cache: npm
       - run: npm ci
       - run: npx playwright install --with-deps chromium
-      # Starts the dev server itself (see playwright.config.ts), then runs the film and tour flows on desktop and mobile.
+      # Builds and serves the site itself (see playwright.config.ts), then runs the film and tour flows on desktop and mobile.
       - run: npx playwright test
       - if: failure()
         uses: actions/upload-artifact@v4

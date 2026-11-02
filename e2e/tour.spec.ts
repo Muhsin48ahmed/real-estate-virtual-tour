@@ -3,6 +3,7 @@ import { expect, test, type Page } from '@playwright/test'
 const SCREENSHOT_DIR = 'e2e/screenshots'
 /** Lets camera transitions and the cutaway animation settle before a screenshot. */
 const SETTLE_MS = 2500
+const SCENE_READY_MS = 60_000
 
 const trackConsoleErrors = (page: Page): string[] => {
   const errors: string[] = []
@@ -15,7 +16,8 @@ const trackConsoleErrors = (page: Page): string[] => {
 
 const waitForScene = async (page: Page) => {
   await expect(page.locator('.tour-canvas canvas')).toBeVisible()
-  await expect(page.locator('.loader')).toHaveClass(/is-done/)
+  // The sky, textures and models must all load; give slow, GPU-less CI runners room.
+  await expect(page.locator('.loader')).toHaveClass(/is-done/, { timeout: SCENE_READY_MS })
 }
 
 /** Phones start with the plan collapsed; open it when the toggle is showing. */

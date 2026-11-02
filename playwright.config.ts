@@ -6,7 +6,8 @@ const CHANNEL = process.env.CI ? undefined : 'chrome'
 
 export default defineConfig({
   testDir: './e2e',
-  timeout: 60_000,
+  // Software-rendered WebGL on CI runners is slow to compile shaders and light the scene.
+  timeout: 120_000,
   expect: { timeout: 15_000 },
   fullyParallel: false,
   // WebGL with ambient occlusion is heavy on a CPU-rendered headless GPU; one browser at a time keeps timings stable.
@@ -23,8 +24,11 @@ export default defineConfig({
     { name: 'mobile', use: { ...devices['Pixel 7'], channel: CHANNEL } },
   ],
   webServer: {
-    command: `npx vite --port ${PORT} --strictPort`,
+    // Test the production build, as deployed. The dev server re-bundles the 3D libraries the first
+    // time the tour loads and reloads the page mid-test, which breaks the lazily loaded scene.
+    command: `npm run build && npx vite preview --port ${PORT} --strictPort`,
     port: PORT,
+    timeout: 180_000,
     reuseExistingServer: false,
   },
 })
