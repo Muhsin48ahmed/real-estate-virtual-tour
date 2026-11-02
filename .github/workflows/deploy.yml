@@ -48,7 +48,18 @@ jobs:
       - run: npm ci
       - run: npx playwright install chromium
       - name: Show the WebGL renderer in use
-        run: node -e "const { chromium } = require('@playwright/test'); (async () => { const b = await chromium.launch(); const p = await b.newPage(); console.log(await p.evaluate(() => { const gl = document.createElement('canvas').getContext('webgl2'); const i = gl && gl.getExtension('WEBGL_debug_renderer_info'); return i ? gl.getParameter(i.UNMASKED_RENDERER_WEBGL) : 'no WebGL' })); await b.close() })()"
+        run: |
+          node --input-type=module -e '
+            import { chromium } from "@playwright/test"
+            const browser = await chromium.launch()
+            const page = await browser.newPage()
+            console.log(await page.evaluate(() => {
+              const gl = document.createElement("canvas").getContext("webgl2")
+              const info = gl && gl.getExtension("WEBGL_debug_renderer_info")
+              return info ? gl.getParameter(info.UNMASKED_RENDERER_WEBGL) : "no WebGL"
+            }))
+            await browser.close()
+          '
       # Builds and serves the site itself (see playwright.config.ts), then runs the film and tour flows on desktop and mobile.
       - run: npx playwright test
       - if: failure()
