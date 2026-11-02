@@ -35,8 +35,8 @@ jobs:
           path: dist
 
   e2e:
-    # The 3D tour needs a real GPU: Linux runners only have CPU-rendered WebGL, which stalls for minutes
-    # compiling the interior shaders. Apple Silicon macOS runners expose Metal graphics.
+    # Headless Chrome gets no GPU on hosted runners, so WebGL runs on SwiftShader (CPU) and the app drops to
+    # its "minimal" rendering tier. The Apple Silicon macOS runners get through the suite reliably.
     runs-on: macos-latest
     timeout-minutes: 30
     steps:

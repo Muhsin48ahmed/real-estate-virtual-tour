@@ -26,7 +26,9 @@ const openFloorPlan = async (page: Page) => {
   if (await toggle.isVisible()) await toggle.click()
 }
 
+/** Review screenshots for a human; skipped on CI, where nobody looks at them and every second counts. */
 const shoot = async (page: Page, name: string) => {
+  if (process.env.CI) return
   await page.waitForTimeout(SETTLE_MS)
   await page.screenshot({ path: `${SCREENSHOT_DIR}/${test.info().project.name}-${name}.png` })
 }
@@ -45,7 +47,7 @@ test('overview shows the property, its rooms and the floor plan', async ({ page 
   expect(errors).toEqual([])
 })
 
-test('guided tour walks room to room and ends at the inquiry form', async ({ page }) => {
+test('guided tour walks room to room', async ({ page }) => {
   const errors = trackConsoleErrors(page)
   await page.goto('/?view=tour')
   await waitForScene(page)
@@ -62,7 +64,11 @@ test('guided tour walks room to room and ends at the inquiry form', async ({ pag
   await page.getByRole('button', { name: /Kitchen & Dining, 70 square metres/ }).click()
   await expect(page.getByRole('heading', { name: 'Kitchen & Dining' })).toBeVisible()
   await shoot(page, 'villa-kitchen')
+  expect(errors).toEqual([])
+})
 
+test('the last tour stop leads to the inquiry form', async ({ page }) => {
+  const errors = trackConsoleErrors(page)
   await page.goto('/?property=villa-serena&room=bathroom')
   await waitForScene(page)
   await page.getByRole('button', { name: /request details/i }).click()
